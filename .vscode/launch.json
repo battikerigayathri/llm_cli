@@ -1,0 +1,42 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug executable 'llm-cli'",
+      "cargo": {
+        "args": [
+          "build",
+          "--bin=llm-cli",
+          "--package=llm-cli"
+        ],
+        "filter": {
+          "name": "llm-cli",
+          "kind": "bin"
+        }
+      },
+      "args": ["ask", "What is Rust?"],
+      "cwd": "${workspaceFolder}"
+    },
+    {
+      "type": "lldb",
+      "request": "launch",
+      "name": "Debug unit tests",
+      "cargo": {
+        "args": [
+          "test",
+          "--no-run",
+          "--bin=llm-cli",
+          "--package=llm-cli"
+        ],
+        "filter": {
+          "name": "llm-cli",
+          "kind": "bin"
+        }
+      },
+      "args": [],
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
