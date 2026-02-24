@@ -17,51 +17,62 @@ pub enum Commands {
         /// The question to ask
         #[arg(required_unless_present = "file")]
         query: Option<String>,
-        
+
         /// Read query from file
         #[arg(short, long)]
         file: Option<String>,
-        
+
         /// Output file path
         #[arg(short, long)]
         output: Option<String>,
-        
+
         /// Model to use (overrides config)
         #[arg(short, long)]
         model: Option<String>,
-        
+
         /// Use a template
         #[arg(short, long)]
         template: Option<String>,
     },
-    
+
     /// Start an interactive chat session
     Chat {
         /// Session name (creates new or loads existing)
         #[arg(short, long)]
         session: Option<String>,
-        
+
         /// Model to use (overrides config)
         #[arg(short, long)]
         model: Option<String>,
     },
-    
+
     /// Manage configuration
     Config {
         #[command(subcommand)]
         action: ConfigAction,
     },
-    
+
     /// Manage chat sessions
     Session {
         #[command(subcommand)]
         action: SessionAction,
     },
-    
+
     /// Manage prompt templates
     Template {
         #[command(subcommand)]
         action: TemplateAction,
+    },
+    // Compare
+    Compare {
+        query: String,
+        #[arg(
+            short,
+            long,
+            value_delimiter = ',',
+            default_value = "gpt-4o,claude-3-5-sonnet-20241022"
+        )]
+        models: Vec<String>,
     },
 }
 
@@ -69,7 +80,7 @@ pub enum Commands {
 pub enum ConfigAction {
     /// Set a configuration value
     Set {
-        /// Configuration key (e.g., api.provider, models.default)
+        /// Configuration key (e.g., api.providers.openai.api_key, models.default)
         key: String,
         /// Configuration value
         value: String,
@@ -81,6 +92,8 @@ pub enum ConfigAction {
     },
     /// Show all configuration
     Show,
+    /// List available models
+    ListModels,
     /// Reset configuration to defaults
     Reset,
 }

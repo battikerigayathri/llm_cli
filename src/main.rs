@@ -1,9 +1,9 @@
-mod cli;
 mod api;
-mod config;
-mod session;
+mod cli;
 mod commands;
+mod config;
 mod output;
+mod session;
 mod template;
 mod utils;
 
@@ -14,16 +14,22 @@ use cli::{Cli, Commands};
 async fn main() -> anyhow::Result<()> {
     // Load environment variables
     dotenv::dotenv().ok();
-    
+
     // Initialize logger
     env_logger::init();
-    
+
     // Parse CLI arguments
     let cli = Cli::parse();
-    
+
     // Route to appropriate command handler
     match cli.command {
-        Commands::Ask { query, file, output, model, template } => {
+        Commands::Ask {
+            query,
+            file,
+            output,
+            model,
+            template,
+        } => {
             commands::ask::execute(query, file, output, model, template).await?;
         }
         Commands::Chat { session, model } => {
@@ -38,7 +44,11 @@ async fn main() -> anyhow::Result<()> {
         Commands::Template { action } => {
             commands::template::execute(action)?;
         }
+        Commands::Compare { query, models } => {
+            // You'll need to add 'pub mod compare' to src/commands/mod.rs first
+            commands::compare::execute(query, models).await?;
+        }
     }
-    
+
     Ok(())
 }

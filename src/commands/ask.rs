@@ -1,8 +1,8 @@
 use crate::api::{ChatRequest, LlmClient, Message};
 use crate::config::ConfigManager;
 use crate::output::OutputFormatter;
+use anyhow::Context;
 use anyhow::{anyhow, bail, Result};
-
 /// Executes the 'ask' command to get a one-shot response from the LLM.
 pub async fn execute(
     query: Option<String>,
@@ -12,14 +12,18 @@ pub async fn execute(
     _template: Option<String>,
 ) -> Result<()> {
     // 1. Initialize Configuration
-    // We load the config manager to know which provider and API key name to use
     let config_mgr = ConfigManager::new()?;
-    let config = config_mgr.get(); // WORKS: uses your public getter
-                                   // 2. Resolve the API Key
-                                   // It looks for the variable name defined in your config (e.g., "OPENAI_API_KEY")
-    let api_key = config_mgr.get_api_key()?;
-    // 3. Resolve the Query Text
-    // Priority: Command line argument > File content > Error
+    let config = config_mgr.get();
+
+    // 2. Determine the model to use
+    let model_name = model.unwrap_or_else(|| config.models.default.clone());
+    let model_info = config_mgr
+        .get_model_info(&model_name)
+        .context(format!("Model '{}' not found in config.toml", model_name))?;
+    // 3. Get API key for the provider
+    let api_key = config_mgr.get_api_key(&model_info.provider)?;
+
+    // 4. Resolve the Query Text
     let query_text = if let Some(q) = query {
         q
     } else if let Some(f) = file {
@@ -28,44 +32,43 @@ pub async fn execute(
         bail!("Either a query string or a --file path must be provided.");
     };
 
-    // 4. Initialize Client and Formatter
-    let client = LlmClient::new(api_key, &config.api.provider);
+    // 5. Initialize Client and Formatter
+    let client = LlmClient::new(api_key, &model_info.provider);
     let formatter = OutputFormatter::new(
         config.output.syntax_highlighting,
         config.output.markdown_rendering,
     );
 
-    // 5. Build the Request
-    // We merge CLI flags with default values from your config.toml
+    // 6. Build the Request
     let request = ChatRequest {
-        model: model.unwrap_or_else(|| config.models.default.clone()),
+        model: model_name.clone(),
         messages: vec![Message {
             role: "user".to_string(),
             content: query_text,
         }],
         temperature: Some(config.chat.temperature),
-        max_tokens: config.chat.max_tokens,       // FIX: Removed Some()
-        stream: Some(false),      // FIX: Added Some()
+        max_completion_tokens: config.chat.max_tokens,
+        stream: Some(false),
     };
 
-    formatter.print_info(&format!("🚀 Using provider: {}", config.api.provider));
+    formatter.print_info(&format!(
+        "🚀 Using provider: {} with model: {}",
+        model_info.provider, model_name
+    ));
 
     // 6. Perform the API Call
     match client.chat(request).await {
         Ok(response) => {
-            // Use the unified helper method we created in models.rs
-            let response_text = response.get_text();
-            
-            if response_text.is_empty() || response_text == "Error: No response content found" {
-                formatter.print_error("Received an empty response from the provider.");
+            let text = response.get_text(); // This uses your new logic from model.rs
+            if text.is_empty() {
+                println!("(Received empty response from model)");
             } else {
-                formatter.print_response(&response_text);
+                println!("{}", text); // <-- THIS is what's missing
             }
         }
         Err(e) => {
-            formatter.print_error(&format!("API Call Failed: {}", e));
+            eprintln!("Error: {}", e);
         }
     }
-
     Ok(())
 }

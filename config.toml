@@ -1,0 +1,83 @@
+[api.providers.openai]
+api_key_env = "OPENAI_API_KEY"
+enabled = true
+
+[api.providers.anthropic]
+api_key_env = "ANTHROPIC_API_KEY"
+enabled = true
+
+[api.providers.google]
+api_key = "AIzaSyA_emP4uotFE9kdnVv4BzUvaCDIu94MYRI"
+api_key_env = "GOOGLE_API_KEY"
+enabled = true
+
+[models]
+default = "gemini-3-flash-preview"
+
+[[models.available]]
+name = "gpt-5.2"
+provider = "openai"
+display_name = "GPT-5.2 (Agentic)"
+
+[[models.available]]
+name = "gpt-4o-mini"
+provider = "openai"
+display_name = "GPT-4o Mini"
+
+[[models.available]]
+name = "gpt-5-mini"
+provider = "openai"
+display_name = "GPT-5 Mini"
+
+[[models.available]]
+name = "o3-deep-research"
+provider = "openai"
+display_name = "OpenAI o3 (Reasoning)"
+
+[[models.available]]
+name = "gemini-3.1-pro-preview"
+provider = "google"
+display_name = "Gemini 3.1 Pro"
+
+[[models.available]]
+name = "gemini-3-flash-preview"
+provider = "google"
+display_name = "Gemini 3 Flash"
+
+[[models.available]]
+name = "gemini-1.5-flash"
+provider = "google"
+display_name = "Gemini Flash"
+
+[[models.available]]
+name = "gemini-3-flash"
+provider = "google"
+display_name = "Gemini 3 Flash"
+
+[[models.available]]
+name = "gemini-3-deep-think"
+provider = "google"
+display_name = "Gemini 3 Deep Think"
+
+[[models.available]]
+name = "claude-4-opus-202601"
+provider = "anthropic"
+display_name = "Claude 4 Opus"
+
+[[models.available]]
+name = "claude-3-5-sonnet-20241022"
+provider = "anthropic"
+display_name = "Claude 3.5 Sonnet"
+
+[chat]
+temperature = 0.699999988079071
+max_tokens = 4096
+streaming = true
+
+[session]
+auto_save = true
+max_history = 50
+
+[output]
+syntax_highlighting = true
+markdown_rendering = true

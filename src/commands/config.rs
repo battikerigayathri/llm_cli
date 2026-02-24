@@ -20,6 +20,13 @@ pub fn execute(action: ConfigAction) -> Result<()> {
             println!("{}", "Current Configuration:".green().bold());
             println!("{}", toml::to_string_pretty(config)?);
         }
+        ConfigAction::ListModels => {
+            let available_models = config_manager.get_available_models();
+            println!("{}", "Available Models:".green().bold());
+            for model in available_models {
+                println!("  {} ({}) - {}", model.name.cyan(), model.provider, model.display_name);
+            }
+        }
         ConfigAction::Reset => {
             config_manager.reset()?;
             println!("{} Configuration reset to defaults", "✓".green());
